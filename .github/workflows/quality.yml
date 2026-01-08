@@ -1,0 +1,40 @@
+name: Validate Skills
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      
+      - name: Validate skills
+        run: ./scripts/validate-skills
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm i
+      
+      - name: Check code formatting
+        run: pnpm format:check
