@@ -11,7 +11,7 @@ Review the VS Code `tasks.json` file for consistency and developer experience im
 ## Analysis Steps
 
 1. **Check for available scripts** Check for common task types: dev/run, build, test, lint, format in the language ecosystem (eg JavaScript/TypeScript check `package.json` scripts)
-2. **Identify inconsistencies** in the task.json file property ordering, naming conventions, and missing properties
+2. **Identify inconsistencies** in the task.json analyze property ordering, naming conventions, and missing properties.  The output should be a list of recommended improvements to ensure consistency and enhance developer experience.
 3. **Review task grouping** — VS Code supports `build`, `test`, or `none` groups
 
 ## Improvements to Apply
@@ -25,7 +25,9 @@ Standardize all tasks with consistent property order:
 - Match casing across all tasks
 
 ### Icons
-If tasks already have icons, ensure consistency in style and color. If missing, add semantic icons with appropriate colors using these defaults:
+All tasks should have an icon, if already present ensure consistency in style and color (based on task category) and that the icon is appropriate and intuitive.
+
+If missing, add semantic icons with appropriate colors using these defaults:
 - **Dev/Run tasks**: green (`terminal.ansiGreen`) with `run` or `globe` icons
 - **Build tasks**: cyan (`terminal.ansiCyan`) with `tools` icon
 - **Test tasks**: magenta (`terminal.ansiMagenta`) with `beaker`, `browser`, or `eye` icons
@@ -44,4 +46,4 @@ Add appropriate problem matchers for error detection based on language ecosystem
 - Fix any JSON syntax errors (trailing commas, etc.)
 
 ## Output
-Always present a plan with recommended changes first. Only implement changes after receiving approval.
+Must: Always present a plan with recommended changes first. Only implement changes after receiving approval.
