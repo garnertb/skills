@@ -1,4 +1,4 @@
-# AI Tools
+# AI tools
 
 ## Skills
 
