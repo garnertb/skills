@@ -1,6 +1,9 @@
 ---
 name: vscode-tasks-organizer
 description: Review and improve VS Code tasks.json for consistency and developer experience.
+metadata:
+  author: garnertb
+  version: "1.0"
 ---
 
 Review the VS Code `tasks.json` file for consistency and developer experience improvements.
@@ -22,7 +25,7 @@ Standardize all tasks with consistent property order:
 - Match casing across all tasks
 
 ### Icons
-Add semantic icons with appropriate colors:
+If tasks already have icons, ensure consistency in style and color. If missing, add semantic icons with appropriate colors using these defaults:
 - **Dev/Run tasks**: green (`terminal.ansiGreen`) with `run` or `globe` icons
 - **Build tasks**: cyan (`terminal.ansiCyan`) with `tools` icon
 - **Test tasks**: magenta (`terminal.ansiMagenta`) with `beaker`, `browser`, or `eye` icons
@@ -41,4 +44,4 @@ Add appropriate problem matchers for error detection based on language ecosystem
 - Fix any JSON syntax errors (trailing commas, etc.)
 
 ## Output
-Present a plan with recommended changes, then implement after user confirmation.
+Always present a plan with recommended changes first. Only implement changes after receiving approval.
