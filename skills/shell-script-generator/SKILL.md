@@ -3,7 +3,7 @@ name: shell-script-generator
 description: Generate clean shell scripts following best practices.
 metadata:
   author: garnertb
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Shell Script Creator
