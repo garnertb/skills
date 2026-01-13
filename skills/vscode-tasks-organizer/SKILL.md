@@ -65,8 +65,3 @@ and task type:
 
 - Remove redundant `options.cwd` if defaulting to workspace folder
 - Fix any JSON syntax errors (trailing commas, etc.)
-
-## Output
-
-Must: Always present a plan with recommended changes first. Only implement
-changes after receiving approval.
