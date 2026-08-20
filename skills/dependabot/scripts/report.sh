@@ -246,6 +246,10 @@ fetch_manifests() {
 				project_root: (
 					if $eco == "devcontainers" then to_dir(devcontainer_root($parts))
 					elif $eco == "github-actions" then "/"
+					# Submodules are registered in the root .gitmodules of the
+					# superproject, so a `commit` entry path is not a valid
+					# `directory` -- that would be a dead entry.
+					elif .type == "commit" then "/"
 					else to_dir($parts[:-1]) end
 				),
 				ambiguous: ($eco | test("\\|")),
@@ -256,8 +260,16 @@ fetch_manifests() {
 		]
 		| unique
 		| {
-			complete: ($truncated | not),
-			error: (if $truncated then "git tree was truncated; scan is incomplete -- re-run against a local clone (git clone --filter=blob:none) before reporting any ecosystem as absent" else null end),
+			# Only an explicit truncated:false proves the tree was whole. A
+			# missing or non-boolean field means the response was not the
+			# shape we expect, which must fail closed rather than claim
+			# completeness.
+			complete: ($truncated == false),
+			error: (
+				if $truncated == true then "git tree was truncated; scan is incomplete -- re-run against a local clone (git clone --filter=blob:none) before reporting any ecosystem as absent"
+				elif $truncated != false then "unexpected git tree response: no truncated flag, so completeness is unknown"
+				else null end
+			),
 			ref: $branch,
 			sha: $sha,
 			entries: .

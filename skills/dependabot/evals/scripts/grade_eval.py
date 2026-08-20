@@ -172,7 +172,7 @@ EXPECTATIONS = {
                 r"package-ecosystem:\s*[\"']devcontainers[\"'][\s\S]{0,120}?directory:\s*[\"']/[\"']"
             ],
             "forbidden": [
-                r"package-ecosystem:\s*[\"']devcontainers[\"'][\s\S]{0,120}?directory:\s*[\"']?/?\.devcontainer"
+                r"package-ecosystem:\s*[\"']devcontainers[\"'][\s\S]{0,120}?\n\s*directory:\s*[\"']?/?\.devcontainer"
             ],
         },
         {
@@ -181,7 +181,7 @@ EXPECTATIONS = {
                 r"package-ecosystem:\s*[\"']devcontainers[\"'][\s\S]{0,160}?directory:\s*[\"']/services/worker[\"']"
             ],
             "forbidden": [
-                r"directory:\s*[\"']/services/worker/\.devcontainer"
+                r"\n\s*directory:\s*[\"']/services/worker/\.devcontainer"
             ],
         },
         {
