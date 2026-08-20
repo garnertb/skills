@@ -237,6 +237,7 @@ fetch_manifests() {
 			| (
 				if .type == "commit" then "gitsubmodule"
 				elif ($path | test("^\\.github/workflows/.*\\.ya?ml$")) then "github-actions"
+				elif ($base | test("^action\\.ya?ml$")) then "github-actions"
 				else ecosystem_for($base) end
 			) as $eco
 			| select($eco != null)
@@ -245,7 +246,12 @@ fetch_manifests() {
 				ecosystem: $eco,
 				project_root: (
 					if $eco == "devcontainers" then to_dir(devcontainer_root($parts))
-					elif $eco == "github-actions" then "/"
+					# Workflow files are always registered at the repo root. A
+					# composite action is registered at the directory holding its
+					# action.yml -- the inverse of the devcontainers rule above.
+					elif $eco == "github-actions" then
+						(if ($path | test("^\\.github/workflows/")) then "/"
+						else to_dir($parts[:-1]) end)
 					# Submodules are registered in the root .gitmodules of the
 					# superproject, so a `commit` entry path is not a valid
 					# `directory` -- that would be a dead entry.

@@ -30,7 +30,7 @@ Scan the repository for dependency manifests. Look for:
 | uv                | `uv`             | `pyproject.toml`, `uv.lock`                                        |
 | Docker            | `docker`         | `Dockerfile`                                                       |
 | Docker Compose    | `docker-compose` | `docker-compose.yml`                                               |
-| GitHub Actions    | `github-actions` | `.github/workflows/*.yml`                                          |
+| GitHub Actions    | `github-actions` | `.github/workflows/*.yml`, `action.yml` (composite)                |
 | Go modules        | `gomod`          | `go.mod`                                                           |
 | Bundler (Ruby)    | `bundler`        | `Gemfile`                                                          |
 | Cargo (Rust)      | `cargo`          | `Cargo.toml`                                                       |
@@ -88,6 +88,25 @@ nothing. This is a common incorrect recommendation.
   schedule:
     interval: "weekly"
 ```
+
+**GitHub Actions — `directory` is the folder containing `action.yml`.**
+
+This is the **inverse** of the Dev Containers rule above, so do not generalize
+one to the other. `github-actions` covers two different manifest kinds:
+
+| Manifest path                      | `directory`              | Why                                      |
+| ---------------------------------- | ------------------------ | ---------------------------------------- |
+| `.github/workflows/*.yml`          | `/`                      | Workflows are only scanned from the root |
+| `action.yml` (repo root)           | `/`                      | Root composite action                    |
+| `.github/actions/setup/action.yml` | `/.github/actions/setup` | Nested composite action                  |
+
+When `directory` is `/`, Dependabot scans root `action.yml`/`action.yaml`
+**and** everything in `.github/workflows/`. When `directory` is anything else,
+it scans only `action.yml`/`action.yaml` in that exact folder — it does not look
+for a nested `workflows` directory.
+
+So a repo publishing composite actions needs one entry per action folder in
+addition to the root entry; a single root entry does not cover them.
 
 **Git Submodules** — `.gitmodules`, at the repo root. Submodules also appear in
 the git tree as `commit`-type entries.
