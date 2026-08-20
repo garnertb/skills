@@ -15,9 +15,40 @@ truth; don't duplicate its content here.
 
 ## Workflow
 
-1. **Detect ecosystems** — scan the repo for manifests and map each to its
+1. **Inventory manifests, then detect ecosystems** — build the inventory
+   _before_ looking at any existing `dependabot.yml`, so discovery is
+   independent of what the config already claims. Map each manifest to its
    `package-ecosystem` value
-   ([ecosystem table](./dependabot-config.md#step-1-detect-all-ecosystems)).
+   ([ecosystem table](./dependabot-config.md#step-1-detect-all-ecosystems),
+   [manifest location notes](./dependabot-config.md#manifest-location-notes)).
+
+   Resolve the target first — the repo under review is often **not** checked out
+   locally:
+   - **Remote repo** (or no local checkout): run
+     `scripts/report.sh <owner/repo>` and use its `manifest_inventory` key. It
+     walks the full file tree at a pinned commit, so it sees dotfiles and nested
+     paths. Do not derive ecosystems from the repo `languages` list — linguist
+     reports languages, so it structurally cannot see `devcontainers`,
+     `github-actions`, `pre-commit`, or `gitsubmodule`.
+   - **Local checkout**: the analysis target is the _working tree_, so list both
+     tracked and non-ignored untracked files — `git ls-files` **and**
+     `git ls-files --others --exclude-standard`. A manifest that was just added
+     and not yet committed is a common reason to run this command;
+     `git ls-files` alone would miss it.
+
+   Two rules on completeness:
+   - Match on full paths, not top-level entries. Manifests hide in dot
+     directories (`.devcontainer/`, `.github/workflows/`) and nested packages.
+   - **Never report an ecosystem as absent from an incomplete scan.** If
+     `manifest_inventory.complete` is `false`, or the local listing failed, say
+     the scan was incomplete and what would complete it — an unverified "not
+     detected" reads as authoritative and is worse than silence.
+
+   Flag rather than guess: manifests under `node_modules/`, `vendor/`,
+   `testdata/`, or fixture paths are candidates needing confirmation, and
+   ambiguous signatures (`pyproject.toml` → `pip` vs `uv`; `*.tf` → `terraform`
+   vs `opentofu`) must be confirmed, not assumed.
+
 2. **Map directory coverage** — give every ecosystem at least one location; use
    `directories` (plural) with globs for monorepos, since `directory` (singular)
    doesn't support wildcards
@@ -53,13 +84,23 @@ truth; don't duplicate its content here.
 
 ## Output format
 
-1. Summarize current state: ecosystems found, ecosystems already configured, and
-   gaps.
-2. Propose specific changes as a diff or full file, grouped by the step above
+Keep the per-step checklist internal; report only what the user needs to act on.
+
+1. State the **scan source and ref** and whether it was complete — e.g. "full
+   tree scan of `owner/repo` at `main` (`a1b2c3d`)" or "working tree, tracked +
+   untracked". When the scan was complete, one line covers it: all supported
+   ecosystem signatures were checked. When it was not, say so explicitly and
+   name what would complete it.
+2. List **detected ecosystems with their locations**, then **what the existing
+   config already covers**, then the **gaps** — don't merge coverage and
+   detection into one verdict.
+3. List **ambiguities and candidates** needing confirmation (vendored or fixture
+   paths, `pyproject.toml`, `*.tf`) as questions, not decisions.
+4. Propose specific changes as a diff or full file, grouped by the workflow step
    they address.
-3. Call out any tradeoffs (e.g., grouping hides individual CVEs in the PR title;
+5. Call out any tradeoffs (e.g., grouping hides individual CVEs in the PR title;
    longer intervals delay both features and fixes).
-4. Only write to `.github/dependabot.yml` after the user confirms the direction
+6. Only write to `.github/dependabot.yml` after the user confirms the direction
    — don't silently overwrite an existing config.
 
 ## FAQ

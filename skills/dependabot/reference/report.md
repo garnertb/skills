@@ -15,16 +15,18 @@ Gather and summarize the following information for the given repo/s:
   ecosystems, package managers, and update schedules.
 - Repo context that affects how the above should be interpreted: whether the
   repo is archived, a fork, or private (Dependabot alerts/updates behave
-  differently in each case), the default branch, and the repo's languages (flag
-  any ecosystem present in the code but missing from `dependabot.yml`). Call out
-  archived repos explicitly — **Dependabot does not run on archived repos**, so
-  any alerts/PRs shown are frozen as of the archive date, not current.
+  differently in each case), and the default branch. Call out archived repos
+  explicitly — **Dependabot does not run on archived repos**, so any alerts/PRs
+  shown are frozen as of the archive date, not current.
+- Ecosystems present in the code but missing from `dependabot.yml`, derived from
+  `manifest_inventory` (see below) — **not** from the repo's `languages` list,
+  which is narrative context only.
 
 ## Gathering data
 
 Run [scripts/report.sh](../scripts/report.sh) to fetch repo metadata, alerts,
-PRs, and the `dependabot.yml` config for one or more repos in a single JSON
-payload instead of making separate `gh` calls:
+PRs, a manifest inventory, and the `dependabot.yml` config for one or more repos
+in a single JSON payload instead of making separate `gh` calls:
 
 ```bash
 scripts/report.sh owner/repo [owner/repo ...]
@@ -54,8 +56,22 @@ The `repo` field gives context that changes how the alerts/PRs should be read:
 report — Dependabot stops scanning archived repos entirely, so the
 alerts/pull_requests data is a stale snapshot, not live status. Also call out
 unmaintained repos (`pushed_at` far in the past) where open PRs/alerts may never
-be addressed, and flag languages with no matching ecosystem in
-`dependabot_config`.
+be addressed.
+
+The `manifest_inventory` field is the source of truth for ecosystem gaps. It is
+a full file-tree scan pinned to one commit, so it sees dotfiles and nested
+manifests that `languages` cannot:
+
+- `complete` / `error`: whether the scan is trustworthy. **If `complete` is
+  `false`, do not report any ecosystem as absent** — say the scan was incomplete
+  and surface `error`.
+- `ref` / `sha`: the branch and commit scanned. Cite these in the report.
+- `entries[]`: `path`, `ecosystem`, `project_root` (the value to use as
+  `directory`), `ambiguous` (the signature maps to more than one ecosystem, so
+  confirm rather than assume), and `candidate_only` (a vendored, generated, or
+  fixture path that usually should not be configured).
+
+Flag any `entries[].ecosystem` with no matching entry in `dependabot_config`.
 
 ## Output
 
