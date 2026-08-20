@@ -7,7 +7,7 @@ description: >
   Works with any ecosystem (npm, pip, cargo, go, maven, etc.) and GitHub
   Actions. Do NOT trigger for: setting up auto-merge, reviewing a single PR,
   running npm audit, or building dependency dashboards.
-argument-hint: "[{{command_hint}}] [target]"
+argument-hint: "[report|plan · config] [target]"
 user-invocable: true
 metadata:
   version: 1.1.0
