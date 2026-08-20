@@ -30,6 +30,18 @@
       "prompt": "Our monorepo has npm packages under /apps/* and /packages/*, plus GitHub Actions workflows, but dependabot.yml only covers the root npm package and PRs are noisy. Help us fix the config.",
       "expected_output": "Flags the missing github-actions ecosystem, proposes directories globs for monorepo coverage, recommends grouping to cut PR noise, and confirms the plan before writing dependabot.yml.",
       "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Review the Dependabot config for the repo org/payments-api. I don't have it cloned locally.",
+      "expected_output": "Acquires a manifest inventory from the remote repo before judging coverage: resolves the default branch to a commit SHA, requests the full recursive git tree, and reports the scan source and whether it was complete. Accounts for truncation and acquisition failures by refusing to report ecosystems as absent from an incomplete scan, rather than silently concluding. Derives ecosystems from manifest paths (including hidden ones such as .devcontainer/, .github/workflows/, .gitmodules) instead of inferring them from the repository language list.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Here is the full file listing for a repo I want a dependabot.yml for. Tell me which ecosystems to configure and where.\n\n```\n.devcontainer/devcontainer.json\n.github/workflows/ci.yml\n.gitmodules\npackage.json\nservices/worker/.devcontainer/devcontainer.json\nservices/worker/pyproject.toml\nservices/worker/uv.lock\ntest/fixtures/sample-project/.devcontainer/devcontainer.json\n```",
+      "expected_output": "Identifies devcontainers, github-actions, gitsubmodule, npm, and uv. Critically, sets the devcontainers `directory` to the project root that contains the .devcontainer folder (\"/\" and \"/services/worker\"), never to the .devcontainer folder itself, since Dependabot searches .devcontainer/devcontainer.json relative to the configured directory. Chooses uv over pip because uv.lock is present. Treats the devcontainer under test/fixtures/ as a candidate needing confirmation rather than auto-configuring it. Confirms before writing the file.",
+      "files": []
     }
   ]
 }
