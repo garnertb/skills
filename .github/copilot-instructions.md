@@ -34,6 +34,23 @@ language for clear guidance. See
 [skills/shell-script-generator/SKILL.md](../skills/shell-script-generator/SKILL.md)
 for a well-structured example.
 
+## Command-Like Skills
+
+A skill that contains a `references/routing.md` is a **command-like skill**: its
+`SKILL.md` is an entry point that dispatches to nested commands rather than
+executing a single workflow. Treat these skills like a CLI:
+
+- The `SKILL.md` defines the top-level command (e.g. `/skill-name`) and
+  delegates to `references/routing.md` to decide which nested command applies.
+- `references/routing.md` maps user intent to a nested command and MUST NOT
+  auto-run a command — it recommends, and the user confirms.
+- Each nested command (e.g. `report`, `plan`, `config`) has its own reference
+  doc under `references/` that the entry point loads on demand.
+
+See [skills/dependabot/SKILL.md](../skills/dependabot/SKILL.md) and its
+[reference/routing.md](../skills/dependabot/reference/routing.md) for a working
+example.
+
 ## Development Workflow
 
 ### Creating a New Skill
