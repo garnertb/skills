@@ -27,8 +27,10 @@ truth; don't duplicate its content here.
    - **Remote repo** (or no local checkout): run
      `scripts/report.sh <owner/repo>` and use its `manifest_inventory` key. It
      walks the full file tree at a pinned commit, so it sees dotfiles and nested
-     paths. Do not derive ecosystems from the repo `languages` list — linguist
-     reports languages, so it structurally cannot see `devcontainers`,
+     paths, and returns one entry per (ecosystem, `directory`) pair with the
+     `directory` already resolved — use it as given rather than re-deriving it
+     from `paths`. Do not derive ecosystems from the repo `languages` list —
+     linguist reports languages, so it structurally cannot see `devcontainers`,
      `github-actions`, `pre-commit`, or `gitsubmodule`.
    - **Local checkout**: the analysis target is the _working tree_, so list both
      tracked and non-ignored untracked files — `git ls-files` **and**
@@ -49,9 +51,12 @@ truth; don't duplicate its content here.
    ambiguous signatures (`pyproject.toml` → `pip` vs `uv`; `*.tf` → `terraform`
    vs `opentofu`) must be confirmed, not assumed.
 
-2. **Map directory coverage** — give every ecosystem at least one location; use
-   `directories` (plural) with globs for monorepos, since `directory` (singular)
-   doesn't support wildcards
+2. **Map directory coverage** — every `manifest_inventory` entry is already one
+   update block, so start from that list rather than inventing locations. Use
+   `directories` (plural) with globs to collapse a monorepo that produced many
+   entries sharing an ecosystem, since `directory` (singular) doesn't support
+   wildcards — but only when the glob cannot pull in paths the scan flagged as
+   `candidate_only`
    ([directory locations](./dependabot-config.md#step-2-map-directory-locations)).
 3. **Confirm a baseline entry** exists for every detected ecosystem before
    layering on optimizations

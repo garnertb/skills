@@ -244,7 +244,7 @@ fetch_manifests() {
 			| {
 				path: $path,
 				ecosystem: $eco,
-				project_root: (
+				directory: (
 					if $eco == "devcontainers" then to_dir(devcontainer_root($parts))
 					# Workflow files are always registered at the repo root. A
 					# composite action is registered at the directory holding its
@@ -258,13 +258,26 @@ fetch_manifests() {
 					elif .type == "commit" then "/"
 					else to_dir($parts[:-1]) end
 				),
-				ambiguous: ($eco | test("\\|")),
-				# Vendored, generated, and fixture trees produce real manifests that
-				# usually should not be configured. Surface them, do not auto-adopt.
-				candidate_only: ($path | test("(^|/)(node_modules|vendor|third_party|testdata|fixtures)/|(^|/)test/fixtures/"))
+				ambiguous: ($eco | test("\\|"))
 			}
 		]
 		| unique
+		# One entry per (ecosystem, directory) pair, which is exactly one
+		# dependabot.yml update block. Paths are kept as the evidence for the
+		# pair so any detection can be audited back to a real file.
+		| group_by([.ecosystem, .directory])
+		| map({
+			ecosystem: .[0].ecosystem,
+			directory: .[0].directory,
+			paths: (map(.path) | unique),
+			ambiguous: .[0].ambiguous,
+			# Judged on the directory that would be configured, not on the
+			# manifest path. A submodule at vendor/lib is registered in the root
+			# .gitmodules, so the directory is "/" and the entry is real even
+			# though the path looks vendored.
+			candidate_only: (.[0].directory | test("(^|/)(node_modules|vendor|third_party|testdata|fixtures)(/|$)|(^|/)test/fixtures(/|$)"))
+		})
+		| sort_by([.ecosystem, .directory])
 		| {
 			# Only an explicit truncated:false proves the tree was whole. A
 			# missing or non-boolean field means the response was not the

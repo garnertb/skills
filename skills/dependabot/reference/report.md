@@ -66,10 +66,19 @@ manifests that `languages` cannot:
   `false`, do not report any ecosystem as absent** — say the scan was incomplete
   and surface `error`.
 - `ref` / `sha`: the branch and commit scanned. Cite these in the report.
-- `entries[]`: `path`, `ecosystem`, `project_root` (the value to use as
-  `directory`), `ambiguous` (the signature maps to more than one ecosystem, so
-  confirm rather than assume), and `candidate_only` (a vendored, generated, or
-  fixture path that usually should not be configured).
+- `entries[]`: one entry per **(ecosystem, directory) pair**, which is exactly
+  one `dependabot.yml` update block:
+  - `ecosystem` — the `package-ecosystem` value.
+  - `directory` — the `directory` value. Already resolved; do not re-derive it
+    from `paths`, since the correct value is not always the folder holding the
+    manifest (see
+    [manifest location notes](./dependabot-config.md#manifest-location-notes)).
+  - `paths[]` — the manifests that justify the pair. Evidence, not input: cite
+    them when reporting a detection.
+  - `ambiguous` — the signature maps to more than one ecosystem (`pip|uv`,
+    `terraform|opentofu`), so confirm rather than assume.
+  - `candidate_only` — every supporting path is vendored, generated, or a
+    fixture, so it usually should not be configured.
 
 Flag any `entries[].ecosystem` with no matching entry in `dependabot_config`.
 
