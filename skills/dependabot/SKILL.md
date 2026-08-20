@@ -10,7 +10,7 @@ description: >
 argument-hint: "[{{command_hint}}] [target]"
 user-invocable: true
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 ## Overview
