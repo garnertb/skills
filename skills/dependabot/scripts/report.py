@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = []
+# ///
 """Gather a Dependabot report for one or more GitHub repositories.
 
 Collects repo metadata, Dependabot security alerts, Dependabot pull requests,
@@ -14,6 +18,12 @@ A 403 on the alerts endpoint is not "zero alerts", a truncated git tree is not
 "no manifests", and a failed contents request is not "no dependabot.yml".
 
 Requires the ``gh`` CLI, authenticated.
+
+Exit codes:
+    0  a report was produced (individual sections may be degraded)
+    2  invalid arguments
+    3  a prerequisite is missing (gh not installed or not authenticated)
+    4  no repository could be reported at all
 """
 
 from __future__ import annotations
@@ -27,6 +37,18 @@ import subprocess
 import sys
 from collections.abc import Iterable
 from typing import Any
+
+EXIT_OK = 0
+EXIT_USAGE = 2
+EXIT_PREREQ = 3
+EXIT_NO_REPORT = 4
+
+# Agent harnesses commonly truncate tool output past ~10-30K characters. A
+# silently truncated inventory reads as "fewer ecosystems", which is the exact
+# false-absence this script exists to prevent, so warn before that can happen.
+STDOUT_WARN_CHARS = 25_000
+
+REPO_ARG = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
 
 # Basename signatures, in match order. Mirrors the ecosystem table in
 # reference/dependabot-config.md; keep the two in sync.
@@ -553,16 +575,48 @@ def report_for_repo(repo: str, include_closed: bool) -> dict[str, Any]:
     }
 
 
+def summarize_report(report: dict[str, Any]) -> str:
+    """One diagnostic line per repo, for stderr and for --output confirmation."""
+    inventory = report.get("manifest_inventory") or {}
+    entries = inventory.get("entries") or []
+    ecosystems = sorted({entry["ecosystem"] for entry in entries})
+    degraded = sorted(
+        name
+        for name, part in report.items()
+        if isinstance(part, dict) and part.get("ok") is False
+    )
+    bits = [
+        "ok" if report.get("ok") else "degraded",
+        f"{len(entries)} inventory entries",
+        f"{len(ecosystems)} ecosystems",
+    ]
+    if degraded:
+        bits.append(f"unreadable: {', '.join(degraded)}")
+    return f"{report['repo']}: " + " | ".join(bits)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="report.py",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         description=(
             "Gather Dependabot alerts, pull requests, configuration, and a "
-            "manifest inventory for one or more repos as JSON."
+            "manifest inventory for one or more repos as JSON on stdout."
         ),
         epilog=(
-            "Every section reports ok and error. When ok is false, nothing may "
-            "be reported as absent from that section."
+            "Every section reports ok and error. When ok is false, nothing may\n"
+            "be reported as absent from that section.\n"
+            "\n"
+            "Examples:\n"
+            "  report.py octocat/hello-world\n"
+            "  report.py --include-closed octocat/hello-world other/repo\n"
+            "  report.py --output report.json big-org/monorepo\n"
+            "\n"
+            "Exit codes:\n"
+            "  0  a report was produced (individual sections may be degraded)\n"
+            "  2  invalid arguments\n"
+            "  3  a prerequisite is missing (gh not installed or not authenticated)\n"
+            "  4  no repository could be reported at all\n"
         ),
     )
     parser.add_argument(
@@ -570,28 +624,91 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="also fetch and summarize closed alerts and pull requests",
     )
+    parser.add_argument(
+        "--output",
+        metavar="FILE",
+        default="-",
+        help=(
+            "write the JSON report to FILE and print a summary to stdout; "
+            "'-' (default) writes JSON to stdout"
+        ),
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="suppress per-repo progress diagnostics on stderr",
+    )
     parser.add_argument("repos", nargs="+", metavar="owner/repo")
     args = parser.parse_args(argv)
 
+    malformed = [repo for repo in args.repos if not REPO_ARG.match(repo)]
+    if malformed:
+        # gh silently expands a bare name to the current user's namespace, which
+        # would spend four API calls before failing on the wrong repository.
+        print(
+            f"error: expected owner/repo, received: {', '.join(malformed)}\n"
+            f"       example: report.py octocat/hello-world",
+            file=sys.stderr,
+        )
+        return EXIT_USAGE
+
     if shutil.which("gh") is None:
-        print("error: gh CLI is required", file=sys.stderr)
-        return 1
+        print(
+            "error: the gh CLI is required but was not found on PATH.\n"
+            "       install it from https://cli.github.com, then run: gh auth login",
+            file=sys.stderr,
+        )
+        return EXIT_PREREQ
 
     # One unreachable repo must not discard the reports already gathered.
     reports = []
-    for repo in args.repos:
+    for index, repo in enumerate(args.repos, start=1):
+        if not args.quiet:
+            print(f"[{index}/{len(args.repos)}] {repo}", file=sys.stderr)
         try:
-            reports.append(report_for_repo(repo, args.include_closed))
+            report = report_for_repo(repo, args.include_closed)
         except Exception as exc:  # noqa: BLE001 - one repo must not abort the run
-            reports.append(
-                {"repo": repo, "ok": False, "error": f"report failed: {exc}"}
-            )
+            report = {"repo": repo, "ok": False, "error": f"report failed: {exc}"}
+        reports.append(report)
+        if not args.quiet:
+            print(f"    {summarize_report(report)}", file=sys.stderr)
 
-    json.dump(reports, sys.stdout, indent=2)
-    sys.stdout.write("\n")
+    payload = json.dumps(reports, indent=2)
+    produced_a_report = any("error" not in report for report in reports)
+
+    if not produced_a_report:
+        print(
+            "error: no repository could be reported; see the error field on each "
+            "entry.\n       check `gh auth status` and the repository names.",
+            file=sys.stderr,
+        )
+
+    if args.output != "-":
+        try:
+            with open(args.output, "w", encoding="utf-8") as handle:
+                handle.write(payload + "\n")
+        except OSError as exc:
+            print(f"error: could not write {args.output}: {exc}", file=sys.stderr)
+            return EXIT_USAGE
+        print(f"wrote {len(payload)} characters to {args.output}")
+        for report in reports:
+            print(summarize_report(report))
+    else:
+        if len(payload) > STDOUT_WARN_CHARS:
+            print(
+                f"warning: report is {len(payload)} characters, which may be "
+                f"truncated by the caller.\n"
+                f"         re-run with --output FILE and query the file with jq "
+                f"to read it in full.",
+                file=sys.stderr,
+            )
+        sys.stdout.write(payload + "\n")
+
+    if not produced_a_report:
+        return EXIT_NO_REPORT
     # A degraded section is reported in-band via ok/error, not via exit status,
     # so callers never discard an otherwise usable report.
-    return 0
+    return EXIT_OK
 
 
 if __name__ == "__main__":

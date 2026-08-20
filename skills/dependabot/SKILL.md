@@ -10,7 +10,7 @@ description: >
 argument-hint: "[report|plan · config] [target]"
 user-invocable: true
 metadata:
-  version: 1.3
+  version: 1.4
 ---
 
 ## Overview
@@ -55,3 +55,20 @@ Routing:
 - **Explicit or clearly implied command:** load its reference (native variant on
   native platforms) and follow it. Ask once if two commands fit.
 - **Otherwise:** treat the request as general question about Dependabot.
+
+## Available scripts
+
+| Script                                   | Purpose                                                                                                                 |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [scripts/report.py](./scripts/report.py) | Gather alerts, PRs, config, and a deterministic manifest inventory for one or more remote repos as JSON. Requires `gh`. |
+
+```bash
+python3 ./scripts/report.py owner/repo                    # JSON on stdout
+python3 ./scripts/report.py --output report.json org/big  # large repos
+python3 ./scripts/report.py --help                        # flags and exit codes
+```
+
+`report` and `config` both source their ecosystem inventory from this script, so
+detection is deterministic rather than improvised. Run `--help` for the exit
+codes; a section that reports `ok: false` means **nothing may be treated as
+absent from that section**.

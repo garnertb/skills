@@ -31,10 +31,38 @@ in a single JSON payload instead of making separate `gh` calls:
 ```bash
 scripts/report.py owner/repo [owner/repo ...]
 scripts/report.py --include-closed owner/repo [owner/repo ...]
+scripts/report.py --output report.json owner/repo   # large repos
 ```
 
 Requires Python 3.9+ and the `gh` CLI (authenticated). Use the JSON output as
 the source of truth when building the report below.
+
+### Large repositories
+
+The payload scales with the number of manifests: a monorepo can exceed 50K
+characters, past the point where a harness may truncate tool output. The script
+warns on stderr when the stdout payload is large. When that happens — or
+pre-emptively for a repo you expect to be big — pass `--output FILE` and query
+the file rather than reading a silently truncated payload:
+
+```bash
+scripts/report.py --output report.json owner/repo
+jq '.[0].manifest_inventory.entries[] | {ecosystem, directory}' report.json
+```
+
+With `--output`, stdout carries a one-line summary per repo and the full JSON
+goes to the file.
+
+### Exit codes
+
+| Code | Meaning                                                           |
+| ---- | ----------------------------------------------------------------- |
+| `0`  | A report was produced. Individual sections may still be degraded. |
+| `2`  | Invalid arguments — for example a repo not in `owner/repo` form.  |
+| `3`  | `gh` is missing or unauthenticated.                               |
+| `4`  | No repository could be reported at all.                           |
+
+Progress diagnostics go to stderr, so stdout stays parseable JSON.
 
 ### Reading a degraded payload
 

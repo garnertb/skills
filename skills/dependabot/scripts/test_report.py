@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
+import contextlib
+import io
+import json
+import os
 import re
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -487,14 +492,135 @@ class TestRepoReport(unittest.TestCase):
                 raise RuntimeError("network gone")
             return {"repo": repo, "ok": True}
 
-        buffer = []
-        with mock.patch.object(report, "report_for_repo", side_effect=flaky), \
-             mock.patch.object(report.shutil, "which", return_value="/usr/bin/gh"), \
-             mock.patch.object(report.json, "dump", side_effect=lambda d, *a, **k: buffer.append(d)):
-            code = report.main(["o/bad", "o/good"])
+        with mock.patch.object(report, "report_for_repo", side_effect=flaky):
+            code, out, _ = run_cli(["o/bad", "o/good", "--quiet"])
 
-        self.assertEqual(code, 0)
-        self.assertEqual([r["ok"] for r in buffer[0]], [False, True])
+        self.assertEqual(code, report.EXIT_OK)
+        self.assertEqual([r["ok"] for r in json.loads(out)], [False, True])
+
+
+def run_cli(argv):
+    """Invoke main() with gh present, capturing stdout and stderr."""
+    out, err = io.StringIO(), io.StringIO()
+    with mock.patch.object(report.shutil, "which", return_value="/usr/bin/gh"), \
+         contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        code = report.main(argv)
+    return code, out.getvalue(), err.getvalue()
+
+
+class TestCli(unittest.TestCase):
+    """The CLI surface an agent reads: exit codes, stderr, and output size."""
+
+    def ok_report(self, repo="o/r", entries=1):
+        return {
+            "repo": repo,
+            "ok": True,
+            "manifest_inventory": {
+                "ok": True,
+                "entries": [
+                    {"ecosystem": "npm", "directory": f"/p{i}"} for i in range(entries)
+                ],
+            },
+        }
+
+    def test_malformed_repo_is_rejected_before_any_api_call(self):
+        with mock.patch.object(report, "report_for_repo") as fetch:
+            code, _, err = run_cli(["not-a-slug"])
+        fetch.assert_not_called()
+        self.assertEqual(code, report.EXIT_USAGE)
+        self.assertIn("owner/repo", err)
+        self.assertIn("not-a-slug", err)
+
+    def test_accepts_names_with_dots_and_dashes(self):
+        for repo in ("o/r", "my-org/my.repo", "a_b/c-d.e"):
+            with self.subTest(repo=repo):
+                self.assertTrue(report.REPO_ARG.match(repo))
+        for bad in ("bare", "a/b/c", "o/", "/r", "o r"):
+            with self.subTest(bad=bad):
+                self.assertFalse(report.REPO_ARG.match(bad))
+
+    def test_missing_gh_reports_prereq_and_says_how_to_fix_it(self):
+        err_buf = io.StringIO()
+        with mock.patch.object(report.shutil, "which", return_value=None), \
+             contextlib.redirect_stderr(err_buf):
+            code = report.main(["o/r"])
+        self.assertEqual(code, report.EXIT_PREREQ)
+        self.assertIn("cli.github.com", err_buf.getvalue())
+
+    def test_all_repos_failing_exits_no_report(self):
+        def boom(repo, include_closed):
+            raise RuntimeError("network gone")
+
+        with mock.patch.object(report, "report_for_repo", side_effect=boom):
+            code, out, err = run_cli(["o/a", "o/b", "--quiet"])
+        self.assertEqual(code, report.EXIT_NO_REPORT)
+        self.assertIn("gh auth status", err)
+        # The payload is still emitted so the caller can read the reasons.
+        self.assertEqual(len(json.loads(out)), 2)
+
+    def test_partial_success_still_exits_zero(self):
+        def flaky(repo, include_closed):
+            if repo == "o/bad":
+                raise RuntimeError("nope")
+            return self.ok_report(repo)
+
+        with mock.patch.object(report, "report_for_repo", side_effect=flaky):
+            code, _, _ = run_cli(["o/bad", "o/good", "--quiet"])
+        self.assertEqual(code, report.EXIT_OK)
+
+    def test_large_stdout_payload_warns_about_truncation(self):
+        big = self.ok_report(entries=4000)
+        with mock.patch.object(report, "report_for_repo", return_value=big):
+            _, out, err = run_cli(["o/r", "--quiet"])
+        self.assertGreater(len(out), report.STDOUT_WARN_CHARS)
+        self.assertIn("truncated", err)
+        self.assertIn("--output", err)
+
+    def test_small_payload_does_not_warn(self):
+        with mock.patch.object(report, "report_for_repo", return_value=self.ok_report()):
+            _, _, err = run_cli(["o/r", "--quiet"])
+        self.assertNotIn("truncated", err)
+
+    def test_output_file_keeps_stdout_small_and_writes_full_json(self):
+        big = self.ok_report(entries=4000)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "report.json")
+            with mock.patch.object(report, "report_for_repo", return_value=big):
+                code, out, _ = run_cli(["o/r", "--output", path, "--quiet"])
+            self.assertEqual(code, report.EXIT_OK)
+            written = json.loads(Path(path).read_text(encoding="utf-8"))
+        self.assertEqual(len(written[0]["manifest_inventory"]["entries"]), 4000)
+        # stdout carries a summary, not the payload.
+        self.assertLess(len(out), 500)
+        self.assertIn(path, out)
+
+    def test_unwritable_output_path_is_a_usage_error(self):
+        with mock.patch.object(report, "report_for_repo", return_value=self.ok_report()):
+            code, _, err = run_cli(["o/r", "--output", "/nope/nope.json", "--quiet"])
+        self.assertEqual(code, report.EXIT_USAGE)
+        self.assertIn("could not write", err)
+
+    def test_stdout_stays_pure_json_while_diagnostics_go_to_stderr(self):
+        with mock.patch.object(report, "report_for_repo", return_value=self.ok_report()):
+            _, out, err = run_cli(["o/r"])
+        json.loads(out)  # would raise if progress lines leaked into stdout
+        self.assertIn("[1/1] o/r", err)
+
+    def test_quiet_suppresses_progress(self):
+        with mock.patch.object(report, "report_for_repo", return_value=self.ok_report()):
+            _, _, err = run_cli(["o/r", "--quiet"])
+        self.assertEqual(err, "")
+
+    def test_summary_names_the_unreadable_sections(self):
+        degraded = {
+            "repo": "o/r",
+            "ok": False,
+            "alerts": {"ok": False, "error": "403"},
+            "manifest_inventory": {"ok": True, "entries": []},
+        }
+        line = report.summarize_report(degraded)
+        self.assertIn("degraded", line)
+        self.assertIn("alerts", line)
 
 
 class TestRunGh(unittest.TestCase):
