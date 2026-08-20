@@ -1,0 +1,6 @@
+# Skills that intentionally use Claude Code-only frontmatter fields
+# (e.g. argument-hint, user-invocable) and are therefore validated with a
+# lighter check instead of the strict agentskills.io portable spec.
+#
+# One skill name (folder name) per line. See scripts/validate-skills.
+dependabot

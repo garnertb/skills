@@ -23,6 +23,7 @@ set -o errexit -o nounset -o pipefail
 # Get the directory where this script lives
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILLS_DIR="${SCRIPT_DIR}/../skills"
+CLAUDE_CODE_SKILLS_FILE="${SCRIPT_DIR}/claude-code-skills.txt"
 
 if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
 	grep '^#/' <"$0" | cut -c 4-
@@ -35,10 +36,56 @@ if ! command -v uvx >/dev/null 2>&1; then
 	exit 1
 fi
 
+# Skills listed here use Claude Code-only frontmatter (e.g. argument-hint,
+# user-invocable) and can't pass the strict agentskills.io portable spec.
+is_claude_code_skill() {
+	declare skill_name="$1"
+	[ -f "$CLAUDE_CODE_SKILLS_FILE" ] && grep -qx "$skill_name" "$CLAUDE_CODE_SKILLS_FILE"
+}
+
+# Lighter check for Claude Code-only skills: frontmatter must be present with
+# a name and description, but extra Claude Code fields are allowed.
+validate_claude_code_skill() {
+	declare skill_path="$1"
+	declare skill_name skill_md frontmatter
+	skill_name="$(basename "$skill_path")"
+	skill_md="${skill_path}/SKILL.md"
+
+	echo "Validating skill (Claude Code frontmatter): $skill_name"
+
+	if [ ! -f "$skill_md" ]; then
+		echo "✗ $skill_name validation failed: missing SKILL.md" >&2
+		return 1
+	fi
+
+	frontmatter="$(awk '/^---$/{c++; next} c==1' "$skill_md")"
+
+	if ! head -1 "$skill_md" | grep -q '^---$'; then
+		echo "✗ $skill_name validation failed: SKILL.md must start with YAML frontmatter (---)" >&2
+		return 1
+	fi
+	if ! grep -q '^name:' <<<"$frontmatter"; then
+		echo "✗ $skill_name validation failed: frontmatter missing required 'name' field" >&2
+		return 1
+	fi
+	if ! grep -q '^description:' <<<"$frontmatter"; then
+		echo "✗ $skill_name validation failed: frontmatter missing required 'description' field" >&2
+		return 1
+	fi
+
+	echo "✓ $skill_name is valid (Claude Code frontmatter, not portable spec)"
+	return 0
+}
+
 validate_skill() {
 	declare skill_path="$1"
 	declare skill_name
 	skill_name="$(basename "$skill_path")"
+
+	if is_claude_code_skill "$skill_name"; then
+		validate_claude_code_skill "$skill_path"
+		return $?
+	fi
 
 	echo "Validating skill: $skill_name"
 	if uvx --from "git+https://github.com/agentskills/agentskills#subdirectory=skills-ref" skills-ref validate "$skill_path"; then
