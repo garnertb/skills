@@ -98,6 +98,28 @@ EXPECTATIONS = {
             "forbidden": [],
         },
     ],
+    4: [
+        {
+            "text": "Flags missing github-actions ecosystem coverage",
+            "required": [r"github-actions", r"missing|not (?:configured|covered)|gap"],
+            "forbidden": [],
+        },
+        {
+            "text": "Proposes directories globs for monorepo coverage",
+            "required": [r"directories", r"apps/\*|packages/\*|glob"],
+            "forbidden": [],
+        },
+        {
+            "text": "Recommends grouping to reduce PR noise",
+            "required": [r"group|groups"],
+            "forbidden": [],
+        },
+        {
+            "text": "Confirms plan before writing dependabot.yml",
+            "required": [r"confirm|before (?:writing|applying|updating)|approve"],
+            "forbidden": [],
+        },
+    ],
 }
 
 

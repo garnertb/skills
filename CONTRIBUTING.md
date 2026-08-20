@@ -84,6 +84,12 @@ Skills are validated against the
 ./scripts/validate-skills <skill-name>
 ```
 
+If a skill intentionally uses Claude Code-only frontmatter fields (e.g.
+`argument-hint`, `user-invocable`) that the portable agentskills spec doesn't
+allow, add its folder name to `scripts/claude-code-skills.txt`. Those skills are
+checked with a lighter rule instead (frontmatter present with `name` and
+`description`) rather than the full portable spec.
+
 ### Formatting
 
 Markdown files use Prettier with prose wrap at 80 characters:

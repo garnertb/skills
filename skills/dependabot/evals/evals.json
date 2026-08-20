@@ -24,6 +24,12 @@
       "prompt": "Quick question: can we have multiple dependabot.yml files and should we auto-merge all major updates?",
       "expected_output": "Correctly states single-file config limitation and rejects blanket auto-merge for risky updates.",
       "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Our monorepo has npm packages under /apps/* and /packages/*, plus GitHub Actions workflows, but dependabot.yml only covers the root npm package and PRs are noisy. Help us fix the config.",
+      "expected_output": "Flags the missing github-actions ecosystem, proposes directories globs for monorepo coverage, recommends grouping to cut PR noise, and confirms the plan before writing dependabot.yml.",
+      "files": []
     }
   ]
 }

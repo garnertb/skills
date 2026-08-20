@@ -5,8 +5,8 @@ skill.
 
 ## Contents
 
-- `evals.json`: test prompts that cover no-arg routing, report, plan, and
-  general Dependabot behavior.
+- `evals.json`: test prompts that cover no-arg routing, report, plan, config,
+  and general Dependabot behavior.
 - `scripts/grade_eval.py`: grades one output file for a single eval ID.
 - `scripts/grade_iteration.sh`: grades all outputs in an iteration directory.
 
