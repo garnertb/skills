@@ -200,6 +200,42 @@ EXPECTATIONS = {
             "forbidden": [],
         },
     ],
+    7: [
+        {
+            "text": "Does not report zero alerts when the alerts section failed",
+            "required": [],
+            "forbidden": [
+                r"(no|zero|0)\s+(open\s+)?(dependabot\s+)?(security\s+)?(alerts|vulnerabilities)\b(?![\s\S]{0,80}(could not|unable|unknown|403|denied))",
+                r"alerts?\s+(are\s+)?clean\b",
+            ],
+        },
+        {
+            "text": "Names the alerts section as unreadable rather than empty",
+            "required": [
+                r"(403|not authorized|permission|access)",
+                r"(could not|unable to|failed to|cannot)\s+(be\s+)?(fetch|read|retriev|determin|conclud)",
+            ],
+            "forbidden": [],
+        },
+        {
+            "text": "Does not claim any ecosystem is missing when the manifest scan failed",
+            "required": [],
+            "forbidden": [
+                r"(missing|absent|not configured|no)\s+(ecosystem|coverage)[\s\S]{0,60}(gap|missing)",
+                r"all\s+ecosystems\s+are\s+(configured|covered)",
+            ],
+        },
+        {
+            "text": "Still reports the sections that succeeded",
+            "required": [r"pull request|PR\b", r"\b3\b|three"],
+            "forbidden": [],
+        },
+        {
+            "text": "States what would make the failed sections readable",
+            "required": [r"admin|permission|token|scope|re-?run|access"],
+            "forbidden": [],
+        },
+    ],
 }
 
 

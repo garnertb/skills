@@ -38,3 +38,21 @@ jobs:
       
       - name: Check code formatting
         run: pnpm format:check
+
+  test-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run skill script tests
+        run: |
+          find skills -name 'test_*.py' -exec dirname {} \; | sort -u | while read -r dir; do
+            echo "::group::$dir"
+            python -m unittest discover -s "$dir" -v
+            echo "::endgroup::"
+          done
