@@ -388,11 +388,7 @@ interface RevenueEvent {
   // Transaction details
   transaction_id: string;
   transaction_type:
-    | "purchase"
-    | "subscription"
-    | "renewal"
-    | "refund"
-    | "chargeback";
+    "purchase" | "subscription" | "renewal" | "refund" | "chargeback";
   gross_amount_cents: number;
   net_amount_cents: number;
   currency: string;
