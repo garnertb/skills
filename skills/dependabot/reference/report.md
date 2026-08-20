@@ -62,3 +62,13 @@ be addressed, and flag languages with no matching ecosystem in
 Produce a report in a structured format (e.g., JSON, Markdown, or table) that
 summarizes the above information for each repo. Include any relevant links to
 the alerts, PRs, and configuration files.
+
+The rendered report **is** the deliverable. Keep the surrounding chat lean:
+
+- Do **not** follow the report with a prose recap of the same findings (no "Key
+  findings", "Recommendations given", or "The report is delivered" sections) —
+  it duplicates content the report already contains.
+- Do **not** add meta-commentary about having finished or about `report` being
+  an analyze-only command.
+- After the report, at most **one short line** offering a logical next step
+  (e.g. `/dependabot plan` or `/dependabot config`). Omit it if nothing applies.

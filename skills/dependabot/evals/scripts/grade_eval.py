@@ -58,6 +58,16 @@ EXPECTATIONS = {
             "required": [r"closed_summary|closed summary|merged|dismissed|fixed"],
             "forbidden": [],
         },
+        {
+            "text": "Report stands alone without a redundant recap or meta-commentary",
+            "required": [],
+            "forbidden": [
+                r"key findings:",
+                r"recommendations given",
+                r"report is delivered|report has been delivered|delivered the (?:dependabot )?report",
+                r"analyze-only command",
+            ],
+        },
     ],
     2: [
         {

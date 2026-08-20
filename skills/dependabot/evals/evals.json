@@ -10,7 +10,7 @@
     {
       "id": 1,
       "prompt": "Analyze Dependabot status for org/service-a and org/service-b including closed history and config gaps.",
-      "expected_output": "Structured report with alerts, PRs, dependabot.yml context, archived/fork/private caveats, and missing ecosystem callouts.",
+      "expected_output": "Structured report with alerts, PRs, dependabot.yml context, archived/fork/private caveats, and missing ecosystem callouts. The report stands alone with no redundant post-report recap (no 'Key findings'/'Recommendations given') or meta-commentary about being analyze-only.",
       "files": []
     },
     {

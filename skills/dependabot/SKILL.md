@@ -10,7 +10,7 @@ description: >
 argument-hint: "[report|plan · config] [target]"
 user-invocable: true
 metadata:
-  version: 1.1.1
+  version: 1.1.2
 ---
 
 ## Overview
