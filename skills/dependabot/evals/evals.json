@@ -1,0 +1,29 @@
+{
+  "skill_name": "dependabot",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Run /dependabot with no argument and guide me to the right next command.",
+      "expected_output": "Context-aware menu that recommends /dependabot report first, does not auto-run commands, and asks for user confirmation.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "Analyze Dependabot status for org/service-a and org/service-b including closed history and config gaps.",
+      "expected_output": "Structured report with alerts, PRs, dependabot.yml context, archived/fork/private caveats, and missing ecosystem callouts.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Build a remediation strategy from Dependabot findings using a tiered risk model, and deep-dive risky bumps.",
+      "expected_output": "Tiered plan with explicit Tier 0-3 logic, high-risk changelog plus integration-point analysis, execution strategy, and guardrails.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Quick question: can we have multiple dependabot.yml files and should we auto-merge all major updates?",
+      "expected_output": "Correctly states single-file config limitation and rejects blanket auto-merge for risky updates.",
+      "files": []
+    }
+  ]
+}
