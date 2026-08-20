@@ -30,7 +30,7 @@ Scan the repository for dependency manifests. Look for:
 | uv                | `uv`             | `pyproject.toml`, `uv.lock`                                        |
 | Docker            | `docker`         | `Dockerfile`                                                       |
 | Docker Compose    | `docker-compose` | `docker-compose.yml`                                               |
-| GitHub Actions    | `github-actions` | `.github/workflows/*.yml`                                          |
+| GitHub Actions    | `github-actions` | `.github/workflows/*.yml`, `action.yml` (composite)                |
 | Go modules        | `gomod`          | `go.mod`                                                           |
 | Bundler (Ruby)    | `bundler`        | `Gemfile`                                                          |
 | Cargo (Rust)      | `cargo`          | `Cargo.toml`                                                       |
@@ -46,7 +46,7 @@ Scan the repository for dependency manifests. Look for:
 | Swift             | `swift`          | `Package.swift`                                                    |
 | Pub (Dart)        | `pub`            | `pubspec.yaml`                                                     |
 | Bun               | `bun`            | `bun.lockb`                                                        |
-| Dev Containers    | `devcontainers`  | `devcontainer.json`                                                |
+| Dev Containers    | `devcontainers`  | `.devcontainer/devcontainer.json`, `.devcontainer.json`            |
 | Git Submodules    | `gitsubmodule`   | `.gitmodules`                                                      |
 | Pre-commit        | `pre-commit`     | `.pre-commit-config.yaml`                                          |
 
@@ -54,6 +54,73 @@ Notes:
 
 - pnpm and yarn both use the `npm` ecosystem value.
 - Prefer `uv` ecosystem value when `uv.lock` is present; otherwise use `pip`.
+
+### Manifest Location Notes
+
+Several ecosystems live in dot directories or have a `directory` value that is
+not simply the folder containing the manifest. These are the ones agents get
+wrong most often.
+
+**Dev Containers — `directory` is the project root, not `.devcontainer`.**
+
+Dependabot resolves all three of these paths _relative to_ `directory`:
+
+- `.devcontainer.json` (root of `directory`, note the leading dot)
+- `.devcontainer/devcontainer.json`
+- `.devcontainer/<name>/devcontainer.json`
+
+So `directory` must point at the folder **containing** `.devcontainer`:
+
+| Manifest path                                 | `directory`    |
+| --------------------------------------------- | -------------- |
+| `.devcontainer/devcontainer.json`             | `/`            |
+| `.devcontainer.json`                          | `/`            |
+| `.devcontainer/backend/devcontainer.json`     | `/`            |
+| `apps/worker/.devcontainer/devcontainer.json` | `/apps/worker` |
+
+`directory: "/.devcontainer"` does **not** work. Dependabot would then look for
+`/.devcontainer/.devcontainer.json`, find nothing, and the entry silently does
+nothing. This is a common incorrect recommendation.
+
+```yaml
+- package-ecosystem: "devcontainers"
+  directory: "/" # covers /.devcontainer/devcontainer.json
+  schedule:
+    interval: "weekly"
+```
+
+**GitHub Actions — `directory` is the folder containing `action.yml`.**
+
+This is the **inverse** of the Dev Containers rule above, so do not generalize
+one to the other. `github-actions` covers two different manifest kinds:
+
+| Manifest path                      | `directory`              | Why                                      |
+| ---------------------------------- | ------------------------ | ---------------------------------------- |
+| `.github/workflows/*.yml`          | `/`                      | Workflows are only scanned from the root |
+| `action.yml` (repo root)           | `/`                      | Root composite action                    |
+| `.github/actions/setup/action.yml` | `/.github/actions/setup` | Nested composite action                  |
+
+When `directory` is `/`, Dependabot scans root `action.yml`/`action.yaml`
+**and** everything in `.github/workflows/`. When `directory` is anything else,
+it scans only `action.yml`/`action.yaml` in that exact folder — it does not look
+for a nested `workflows` directory.
+
+So a repo publishing composite actions needs one entry per action folder in
+addition to the root entry; a single root entry does not cover them.
+
+**Git Submodules** — `.gitmodules`, at the repo root. Submodules also appear in
+the git tree as `commit`-type entries.
+
+**Pre-commit** — `.pre-commit-config.yaml` (or `.yml`); `directory` is the
+folder containing it.
+
+**GitHub Actions** — workflows always live in `.github/workflows/`, and
+`directory` is `/` for the repo's own workflows.
+
+Ambiguous signatures — confirm these, don't guess:
+
+- `pyproject.toml` → `pip` or `uv`; a sibling `uv.lock` decides it.
+- `*.tf` → `terraform` or `opentofu`; the filename alone cannot tell you which.
 
 ### Step 2: Map Directory Locations
 

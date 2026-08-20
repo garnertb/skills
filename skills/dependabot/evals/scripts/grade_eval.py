@@ -130,6 +130,112 @@ EXPECTATIONS = {
             "forbidden": [],
         },
     ],
+    5: [
+        {
+            "text": "Scans the remote repo's full file tree rather than assuming a local checkout",
+            "required": [r"git/trees|recursive=1", r"gh api|api\.github\.com"],
+            "forbidden": [],
+        },
+        {
+            "text": "Pins the scan to a resolved default branch or commit SHA",
+            "required": [r"default[ -]branch|commit sha|\bsha\b|\bref\b"],
+            "forbidden": [],
+        },
+        {
+            "text": "Handles truncated or failed acquisition fail-closed",
+            "required": [
+                r"truncat",
+                r"incomplete|fail|cannot|unable|do(?:es)?n['’]?t (?:conclude|report)",
+            ],
+            "forbidden": [],
+        },
+        {
+            "text": "Reports scan source and completeness",
+            "required": [r"scan|inventory", r"complete|truncat|partial"],
+            "forbidden": [],
+        },
+        {
+            "text": "Surfaces hidden-path ecosystems rather than inferring from the language list",
+            "required": [r"\.devcontainer|\.gitmodules|\.pre-commit|\.github/workflows"],
+            "forbidden": [],
+        },
+    ],
+    6: [
+        {
+            "text": "Identifies the devcontainers ecosystem from the raw file listing",
+            "required": [r"devcontainers"],
+            "forbidden": [],
+        },
+        {
+            "text": "Uses the project root as the devcontainers directory, not the .devcontainer folder",
+            "required": [
+                r"package-ecosystem:\s*[\"']devcontainers[\"'][\s\S]{0,120}?directory:\s*[\"']/[\"']"
+            ],
+            "forbidden": [
+                r"package-ecosystem:\s*[\"']devcontainers[\"'][\s\S]{0,120}?\n\s*directory:\s*[\"']?/?\.devcontainer"
+            ],
+        },
+        {
+            "text": "Maps the nested devcontainer to its containing project root",
+            "required": [
+                r"package-ecosystem:\s*[\"']devcontainers[\"'][\s\S]{0,160}?directory:\s*[\"']/services/worker[\"']"
+            ],
+            "forbidden": [
+                r"\n\s*directory:\s*[\"']/services/worker/\.devcontainer"
+            ],
+        },
+        {
+            "text": "Flags gitsubmodule and github-actions from hidden paths",
+            "required": [r"gitsubmodule", r"github-actions"],
+            "forbidden": [],
+        },
+        {
+            "text": "Chooses uv over pip because uv.lock is present",
+            "required": [r"\buv\b", r"uv\.lock"],
+            "forbidden": [],
+        },
+        {
+            "text": "Treats the test fixture devcontainer as a candidate needing confirmation",
+            "required": [r"test/fixtures|fixture", r"confirm|candidate|exclude|skip"],
+            "forbidden": [],
+        },
+    ],
+    7: [
+        {
+            "text": "Does not report zero alerts when the alerts section failed",
+            "required": [],
+            "forbidden": [
+                r"(no|zero|0)\s+(open\s+)?(dependabot\s+)?(security\s+)?(alerts|vulnerabilities)\b(?![\s\S]{0,80}(could not|unable|unknown|403|denied))",
+                r"alerts?\s+(are\s+)?clean\b",
+            ],
+        },
+        {
+            "text": "Names the alerts section as unreadable rather than empty",
+            "required": [
+                r"(403|not authorized|permission|access)",
+                r"(could not|unable to|failed to|cannot)\s+(be\s+)?(fetch|read|retriev|determin|conclud)",
+            ],
+            "forbidden": [],
+        },
+        {
+            "text": "Does not claim any ecosystem is missing when the manifest scan failed",
+            "required": [],
+            "forbidden": [
+                r"(missing|absent|not configured|no)\s+(ecosystem|coverage)[\s\S]{0,60}(gap|missing)",
+                r"all\s+ecosystems\s+are\s+(configured|covered)",
+            ],
+        },
+        {
+            "text": "Still reports the sections that succeeded",
+            "required": [r"pull request|PR\b", r"\b3\b|three"],
+            "forbidden": [],
+        },
+        {
+            "text": "States what would make the failed sections readable",
+            "required": [r"admin|permission|token|scope|re-?run|access"],
+            "forbidden": [],
+        },
+    ],
 }
 
 

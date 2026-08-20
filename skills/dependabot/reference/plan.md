@@ -8,19 +8,23 @@ especially when multiple updates compete for limited engineering time.
 
 Use report output as the starting point for your analysis.
 
-1. Run [scripts/report.sh](../scripts/report.sh) for target repos:
+1. Run [scripts/report.py](../scripts/report.py) for target repos:
 
 ```bash
-scripts/report.sh owner/repo [owner/repo ...]
-scripts/report.sh --include-closed owner/repo [owner/repo ...]
+scripts/report.py owner/repo [owner/repo ...]
+scripts/report.py --include-closed owner/repo [owner/repo ...]
 ```
 
 2. Parse these sections for each repo:
 
-- `repo`
+- `metadata`
 - `alerts.open` and (optionally) `alerts.closed_summary`
 - `pull_requests.open` and (optionally) `pull_requests.closed_summary`
-- `dependabot_config`
+- `config`
+
+Each section carries `ok` and `error`. If a section's `ok` is `false`, treat it
+as unknown rather than empty — do not plan against an absence it did not
+establish.
 
 ## Risk model
 
