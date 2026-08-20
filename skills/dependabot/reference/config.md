@@ -25,7 +25,7 @@ truth; don't duplicate its content here.
    Resolve the target first — the repo under review is often **not** checked out
    locally:
    - **Remote repo** (or no local checkout): run
-     `scripts/report.sh <owner/repo>` and use its `manifest_inventory` key. It
+     `scripts/report.py <owner/repo>` and use its `manifest_inventory` key. It
      walks the full file tree at a pinned commit, so it sees dotfiles and nested
      paths, and returns one entry per (ecosystem, `directory`) pair with the
      `directory` already resolved — use it as given rather than re-deriving it
@@ -42,8 +42,8 @@ truth; don't duplicate its content here.
    - Match on full paths, not top-level entries. Manifests hide in dot
      directories (`.devcontainer/`, `.github/workflows/`) and nested packages.
    - **Never report an ecosystem as absent from an incomplete scan.** If
-     `manifest_inventory.complete` is `false`, or the local listing failed, say
-     the scan was incomplete and what would complete it — an unverified "not
+     `manifest_inventory.ok` is `false`, or the local listing failed, say the
+     scan was incomplete and what would complete it — an unverified "not
      detected" reads as authoritative and is worse than silence.
 
    Flag rather than guess: manifests under `node_modules/`, `vendor/`,
