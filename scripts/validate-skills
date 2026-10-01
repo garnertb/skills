@@ -1,7 +1,8 @@
 #!/bin/bash
-#/ Usage: validate-skills [skill_name]
+#/ Usage: validate-skills [skill_name | category/skill_name]
 #/
 #/ Validates skill files using the skills-ref validator.
+#/ Skills live at skills/<category>/<skill-name>/SKILL.md.
 #/ If a skill name is provided, validates only that skill.
 #/ Otherwise, validates all skills in the skills/ directory.
 #/
@@ -15,6 +16,7 @@
 #/
 #/    Validate a specific skill:
 #/      $ validate-skills vscode-tasks-organizer
+#/      $ validate-skills dev-tooling/vscode-tasks-organizer
 #/
 set -o errexit -o nounset -o pipefail
 
@@ -97,30 +99,53 @@ validate_skill() {
 	fi
 }
 
+# Skills must sit exactly at skills/<category>/<skill-name>/SKILL.md, and
+# skill names must be unique across categories since installers key on name.
+validate_layout() {
+	declare skill_files misplaced duplicates
+	skill_files="$(cd "$SKILLS_DIR" && find . -name SKILL.md -not -path './.*')"
+
+	misplaced="$(awk -F/ 'NF != 4' <<<"$skill_files")"
+	if [ -n "$misplaced" ]; then
+		echo "✗ Skills must live at skills/<category>/<skill-name>/SKILL.md:" >&2
+		echo "$misplaced" >&2
+		return 1
+	fi
+
+	duplicates="$(awk -F/ '{print $3}' <<<"$skill_files" | sort | uniq -d)"
+	if [ -n "$duplicates" ]; then
+		echo "✗ Skill names must be unique across categories:" >&2
+		echo "$duplicates" >&2
+		return 1
+	fi
+}
+
 # Track validation results
 failed=0
 validated=0
 
 if [ -n "${1:-}" ]; then
-	# Validate a specific skill
-	skill_path="${SKILLS_DIR}/$1"
-	if [ ! -d "$skill_path" ]; then
-		echo "Error: Skill '$1' not found in ${SKILLS_DIR}" >&2
+	# Validate a specific skill, by name or category/name
+	skill_path=""
+	for candidate in "${SKILLS_DIR}/$1" "${SKILLS_DIR}"/*/"$1"; do
+		if [ -f "${candidate}/SKILL.md" ]; then
+			skill_path="$candidate"
+			break
+		fi
+	done
+	if [ -z "$skill_path" ]; then
+		echo "Error: Skill '$1' not found in ${SKILLS_DIR}/<category>/" >&2
 		exit 1
 	fi
 	validate_skill "$skill_path" || failed=1
 	validated=1
 else
+	validate_layout || failed=$[failed+1]
+
 	# Validate all skills
-	for skill_path in "${SKILLS_DIR}"/*/; do
+	for skill_path in "${SKILLS_DIR}"/*/*/; do
 		# Skip if no directories found
 		if [ ! -d "$skill_path" ]; then
-			continue
-		fi
-
-		# Skip hidden directories and non-skill directories
-		skill_name="$(basename "$skill_path")"
-		if [ "${skill_name:0:1}" = "." ]; then
 			continue
 		fi
 

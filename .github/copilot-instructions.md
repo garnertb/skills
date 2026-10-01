@@ -8,12 +8,25 @@ knowledge modules that extend AI agent capabilities.
 
 ```
 skills/
-├── <skill-name>/
-│   ├── SKILL.md        # Required: instructions + YAML frontmatter metadata
-│   ├── references/     # Optional: detailed documentation (REFERENCE.md)
-│   ├── scripts/        # Optional: executable code
-│   └── assets/         # Optional: templates, resources
+└── <category>/
+    └── <skill-name>/
+        ├── SKILL.md        # Required: instructions + YAML frontmatter metadata
+        ├── references/     # Optional: detailed documentation (REFERENCE.md)
+        ├── scripts/        # Optional: executable code
+        └── assets/         # Optional: templates, resources
 ```
+
+Skills are grouped into category folders by what they are used for:
+
+| Category      | Purpose                                         |
+| ------------- | ----------------------------------------------- |
+| `dev-tooling` | Developer tooling: shell scripts, editor config |
+| `engineering` | Engineering practices: reviews, PR feedback, UI |
+| `github`      | GitHub platform features (e.g. Dependabot)      |
+| `logs`        | Logging and observability                       |
+
+Place a new skill in the best-fitting existing category; add a new category only
+when no existing one fits. Skill names MUST be unique across categories.
 
 ## Skill File Format
 
@@ -31,7 +44,7 @@ metadata: # Optional
 
 The body contains actionable instructions for AI agents. Use MUST/SHOULD/NEVER
 language for clear guidance. See
-[skills/shell-script-generator/SKILL.md](../skills/shell-script-generator/SKILL.md)
+[skills/dev-tooling/shell-script-generator/SKILL.md](../skills/dev-tooling/shell-script-generator/SKILL.md)
 for a well-structured example.
 
 ## Command-Like Skills
@@ -47,9 +60,9 @@ executing a single workflow. Treat these skills like a CLI:
 - Each nested command (e.g. `report`, `plan`, `config`) has its own reference
   doc under `references/` that the entry point loads on demand.
 
-See [skills/dependabot/SKILL.md](../skills/dependabot/SKILL.md) and its
-[reference/routing.md](../skills/dependabot/reference/routing.md) for a working
-example.
+See [skills/github/dependabot/SKILL.md](../skills/github/dependabot/SKILL.md)
+and its [reference/routing.md](../skills/github/dependabot/reference/routing.md)
+for a working example.
 
 ## Development Workflow
 
@@ -58,7 +71,7 @@ example.
 Use the VS Code task "Create New Skill" or run:
 
 ```bash
-mkdir -p ./skills/<skill-name> && curl -sL https://raw.githubusercontent.com/anthropics/skills/main/template/SKILL.md -o ./skills/<skill-name>/SKILL.md
+mkdir -p ./skills/<category>/<skill-name> && curl -sL https://raw.githubusercontent.com/anthropics/skills/main/template/SKILL.md -o ./skills/<category>/<skill-name>/SKILL.md
 ```
 
 ### Validation
@@ -69,7 +82,7 @@ Skills are validated against the
 
 ```bash
 ./scripts/validate-skills              # Validate all skills
-./scripts/validate-skills <skill-name> # Validate specific skill
+./scripts/validate-skills <skill-name> # Validate specific skill (or <category>/<skill-name>)
 ```
 
 Requires `uvx` (from [uv](https://docs.astral.sh/uv/)).
@@ -133,4 +146,4 @@ All PRs run two checks via `.github/workflows/quality.yml`:
 - Use `references/REFERENCE.md` for detailed examples and extended documentation
 - Keep `SKILL.md` concise and actionable; put verbose content in references
 - Shell scripts in this repo follow the patterns in
-  [shell-script-generator](../skills/shell-script-generator/SKILL.md)
+  [shell-script-generator](../skills/dev-tooling/shell-script-generator/SKILL.md)
