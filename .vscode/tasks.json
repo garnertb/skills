@@ -16,7 +16,7 @@
 		{
 			"label": "Create New Skill",
 			"type": "shell",
-			"command": "mkdir -p ./skills/${input:skillCategory}/${input:skillName} && curl -sL https://raw.githubusercontent.com/anthropics/skills/main/template/SKILL.md -o ./skills/${input:skillCategory}/${input:skillName}/SKILL.md && echo 'Created skill: ${input:skillCategory}/${input:skillName}' && code ./skills/${input:skillCategory}/${input:skillName}/SKILL.md",
+			"command": "skill_dir=./skills/${input:skillCategory}/${input:skillName} && mkdir -p \"$skill_dir\" && curl -sL https://raw.githubusercontent.com/anthropics/skills/main/template/SKILL.md -o \"$skill_dir/SKILL.md\" && echo 'Created skill: ${input:skillCategory}/${input:skillName}' && code \"$skill_dir/SKILL.md\"",
 			"group": "none",
 			"icon": {
 				"id": "add",
