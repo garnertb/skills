@@ -25,8 +25,9 @@ if [ "$#" -ne 1 ]; then
 fi
 
 iteration_dir="$1"
-evals_file="skills/dependabot/evals/evals.json"
-script_file="skills/dependabot/evals/scripts/grade_eval.py"
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+evals_file="${script_dir}/../evals.json"
+script_file="${script_dir}/grade_eval.py"
 
 if [ ! -d "${iteration_dir}" ]; then
 	echo "error: iteration directory not found: ${iteration_dir}" >&2

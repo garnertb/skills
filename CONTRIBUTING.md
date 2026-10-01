@@ -36,21 +36,34 @@ Palette (`Cmd+Shift+P` → `Tasks: Run Task` → `Create New Skill`).
 ### Manual Creation
 
 ```bash
-mkdir -p ./skills/<skill-name>
+mkdir -p ./skills/<category>/<skill-name>
 curl -sL https://raw.githubusercontent.com/anthropics/skills/main/template/SKILL.md \
-  -o ./skills/<skill-name>/SKILL.md
+  -o ./skills/<category>/<skill-name>/SKILL.md
 ```
 
 ### Skill Structure
 
 ```
 skills/
-├── <skill-name>/
-│   ├── SKILL.md        # Required: instructions + YAML frontmatter
-│   ├── references/     # Optional: detailed documentation (REFERENCE.md)
-│   ├── scripts/        # Optional: executable code
-│   └── assets/         # Optional: templates, resources
+└── <category>/
+    └── <skill-name>/
+        ├── SKILL.md        # Required: instructions + YAML frontmatter
+        ├── references/     # Optional: detailed documentation (REFERENCE.md)
+        ├── scripts/        # Optional: executable code
+        └── assets/         # Optional: templates, resources
 ```
+
+Skills are grouped into category folders by what they are used for:
+
+| Category      | Purpose                                         |
+| ------------- | ----------------------------------------------- |
+| `dev-tooling` | Developer tooling: shell scripts, editor config |
+| `engineering` | Engineering practices: reviews, PR feedback, UI |
+| `github`      | GitHub platform features (e.g. Dependabot)      |
+| `logs`        | Logging and observability                       |
+
+Place a new skill in the best-fitting existing category; add a new category only
+when no existing one fits. Skill names MUST be unique across categories.
 
 ### SKILL.md Format
 
@@ -135,13 +148,14 @@ All PRs must pass these checks:
 - Keep `SKILL.md` concise and actionable
 - Use `references/REFERENCE.md` for detailed examples and extended documentation
 - Shell scripts should follow patterns in the
-  [shell-script-generator](skills/shell-script-generator/SKILL.md) skill
+  [shell-script-generator](skills/dev-tooling/shell-script-generator/SKILL.md)
+  skill
 
 ### Code Style
 
 - Use hard tabs in shell scripts
 - Follow the shell script best practices defined in
-  [shell-script-generator](skills/shell-script-generator/SKILL.md)
+  [shell-script-generator](skills/dev-tooling/shell-script-generator/SKILL.md)
 
 ## Questions?
 

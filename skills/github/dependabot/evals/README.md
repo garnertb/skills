@@ -24,14 +24,14 @@ skill.
 3. Grade all found outputs:
 
 ```bash
-bash skills/dependabot/evals/scripts/grade_iteration.sh <workspace>/iteration-1
+bash skills/github/dependabot/evals/scripts/grade_iteration.sh <workspace>/iteration-1
 ```
 
 4. Optional: grade a single output and print JSON to stdout:
 
 ```bash
-python3 skills/dependabot/evals/scripts/grade_eval.py \
-  --evals skills/dependabot/evals/evals.json \
+python3 skills/github/dependabot/evals/scripts/grade_eval.py \
+  --evals skills/github/dependabot/evals/evals.json \
   --eval-id 2 \
   --output <workspace>/iteration-1/eval-2/with_skill/outputs/response.md
 ```

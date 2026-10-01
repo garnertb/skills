@@ -16,6 +16,10 @@ my-skill/
 └── assets/           # Optional: templates, resources
 ```
 
+In this repository, skills are grouped by purpose under category folders:
+`skills/<category>/<skill-name>/` (`dev-tooling`, `engineering`, `github`,
+`logs`).
+
 ## References
 
 - [Skill Specification](https://agentskills.io/specification)
