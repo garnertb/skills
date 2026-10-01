@@ -55,12 +55,12 @@ skills/
 
 Skills are grouped into category folders by what they are used for:
 
-| Category      | Purpose                                         |
-| ------------- | ----------------------------------------------- |
-| `dev-tooling` | Developer tooling: shell scripts, editor config |
-| `engineering` | Engineering practices: reviews, PR feedback, UI |
-| `github`      | GitHub platform features (e.g. Dependabot)      |
-| `logs`        | Logging and observability                       |
+| Category  | Purpose                                                 |
+| --------- | ------------------------------------------------------- |
+| `develop` | Writing and reviewing code: scripts, editor config, PRs |
+| `github`  | GitHub platform features (e.g. Dependabot)              |
+| `logs`    | Logging and observability                               |
+| `web`     | Web UI design and accessibility                         |
 
 Place a new skill in the best-fitting existing category; add a new category only
 when no existing one fits. Skill names MUST be unique across categories.
@@ -148,14 +148,13 @@ All PRs must pass these checks:
 - Keep `SKILL.md` concise and actionable
 - Use `references/REFERENCE.md` for detailed examples and extended documentation
 - Shell scripts should follow patterns in the
-  [shell-script-generator](skills/dev-tooling/shell-script-generator/SKILL.md)
-  skill
+  [shell-script-generator](skills/develop/shell-script-generator/SKILL.md) skill
 
 ### Code Style
 
 - Use hard tabs in shell scripts
 - Follow the shell script best practices defined in
-  [shell-script-generator](skills/dev-tooling/shell-script-generator/SKILL.md)
+  [shell-script-generator](skills/develop/shell-script-generator/SKILL.md)
 
 ## Questions?
 

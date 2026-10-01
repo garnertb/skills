@@ -17,8 +17,7 @@ my-skill/
 ```
 
 In this repository, skills are grouped by purpose under category folders:
-`skills/<category>/<skill-name>/` (`dev-tooling`, `engineering`, `github`,
-`logs`).
+`skills/<category>/<skill-name>/` (`develop`, `github`, `logs`, `web`).
 
 ## References
 

@@ -16,7 +16,7 @@
 #/
 #/    Validate a specific skill:
 #/      $ validate-skills vscode-tasks-organizer
-#/      $ validate-skills dev-tooling/vscode-tasks-organizer
+#/      $ validate-skills develop/vscode-tasks-organizer
 #/
 set -o errexit -o nounset -o pipefail
 
