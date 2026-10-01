@@ -7,6 +7,7 @@ SVG diagrams. Author SVG by hand — do not reach for a rendering library.
 
 - [Canvas and palette](#canvas-and-palette)
 - [Arrowhead markers](#arrowhead-markers)
+- [Timeline layout (default)](#timeline-layout-default)
 - [Nodes](#nodes)
 - [Orthogonal connectors](#orthogonal-connectors)
 - [Numbered step badges](#numbered-step-badges)
@@ -45,6 +46,31 @@ Define one marker and reuse it on every connector via `marker-end`.
     <path d="M0,0 L10,5 L0,10 z" fill="#3f3f46" />
   </marker>
 </defs>
+```
+
+## Timeline layout (default)
+
+For any sequence, flow, or process, lay the diagram out as a **horizontal,
+left-to-right timeline**: time advances along the x-axis, steps sit in order
+from left to right, and a baseline time axis makes the direction explicit. Stack
+swimlanes as horizontal bands beneath the timeline when actors or tiers matter;
+drop a step down into the relevant lane and bring it back to the axis.
+
+- Place event nodes along a shared top row at evenly spaced x positions.
+- Draw a single horizontal time axis near the bottom with one arrowhead on the
+  right so the direction of time is unmistakable.
+- Number the steps left to right; keep every connector orthogonal.
+
+```xml
+<!-- event nodes, left to right -->
+<rect x="60"  y="60" width="150" height="54" rx="10" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="300" y="60" width="150" height="54" rx="10" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="540" y="60" width="150" height="54" rx="10" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2"/>
+
+<!-- time axis: one long horizontal arrow, left to right -->
+<path d="M40,170 L720,170" fill="none" stroke="#a1a1aa" stroke-width="2"
+      stroke-linecap="round" marker-end="url(#arrow)" />
+<text x="700" y="190" text-anchor="end" font-size="12" fill="#71717a">time →</text>
 ```
 
 ## Nodes
@@ -111,11 +137,13 @@ label rows in a corner.
 
 ## Complete worked example
 
-A three-step request flow across two swimlanes, with numbered badges, orthogonal
-connectors, and a transparent background. Use it as a starting skeleton.
+A horizontal left-to-right timeline (the default layout): three sequenced steps
+along a shared row, a bottom time axis, swimlanes stacked beneath, numbered
+badges, orthogonal connectors, and a transparent background. Use it as a
+starting skeleton.
 
 ```xml
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
             markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -126,43 +154,42 @@ connectors, and a transparent background. Use it as a starting skeleton.
     text { font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace; }
   </style>
 
-  <!-- swimlanes -->
-  <rect x="20" y="24" width="600" height="120" rx="6"
+  <!-- swimlanes stacked under the timeline -->
+  <rect x="20" y="40" width="720" height="92" rx="6"
         fill="#f4f4f5" stroke="#d4d4d8" stroke-width="1.5" />
-  <text x="36" y="48" font-size="13" fill="#52525b">Client</text>
-  <rect x="20" y="168" width="600" height="120" rx="6"
+  <text x="36" y="62" font-size="13" fill="#52525b">Client</text>
+  <rect x="20" y="148" width="720" height="92" rx="6"
         fill="#f4f4f5" stroke="#d4d4d8" stroke-width="1.5" />
-  <text x="36" y="192" font-size="13" fill="#52525b">Server</text>
+  <text x="36" y="170" font-size="13" fill="#52525b">Server</text>
 
-  <!-- nodes -->
-  <rect x="70" y="66" width="160" height="56" rx="10"
+  <!-- event nodes, left to right in time order -->
+  <rect x="70" y="70" width="170" height="54" rx="10"
         fill="#eff6ff" stroke="#1d4ed8" stroke-width="2" />
-  <text x="150" y="99" text-anchor="middle" font-size="14" fill="#1e3a8a">Browser</text>
+  <text x="155" y="102" text-anchor="middle" font-size="14" fill="#1e3a8a">Request</text>
 
-  <rect x="400" y="66" width="160" height="56" rx="10"
+  <rect x="300" y="178" width="170" height="54" rx="10"
         fill="#eff6ff" stroke="#1d4ed8" stroke-width="2" />
-  <text x="480" y="99" text-anchor="middle" font-size="14" fill="#1e3a8a">API</text>
+  <text x="385" y="210" text-anchor="middle" font-size="14" fill="#1e3a8a">Validate</text>
 
-  <rect x="400" y="210" width="160" height="56" rx="10"
+  <rect x="530" y="70" width="170" height="54" rx="10"
         fill="#ecfdf5" stroke="#047857" stroke-width="2" />
-  <text x="480" y="243" text-anchor="middle" font-size="14" fill="#065f46">Database</text>
+  <text x="615" y="102" text-anchor="middle" font-size="14" fill="#065f46">Respond</text>
 
-  <!-- 1: browser -> api -->
-  <path d="M230,94 L400,94" fill="none" stroke="#3f3f46" stroke-width="2"
+  <!-- 1: request -> validate -->
+  <path d="M240,97 L385,97 L385,178" fill="none" stroke="#3f3f46" stroke-width="2"
         stroke-linecap="round" marker-end="url(#arrow)" />
-  <circle cx="315" cy="94" r="11" fill="#1d4ed8" />
-  <text x="315" y="99" text-anchor="middle" font-size="13" fill="#ffffff">1</text>
+  <circle cx="385" cy="150" r="11" fill="#1d4ed8" />
+  <text x="385" y="155" text-anchor="middle" font-size="13" fill="#ffffff">1</text>
 
-  <!-- 2: api -> database -->
-  <path d="M480,122 L480,210" fill="none" stroke="#3f3f46" stroke-width="2"
+  <!-- 2: validate -> respond -->
+  <path d="M470,205 L615,205 L615,124" fill="none" stroke="#3f3f46" stroke-width="2"
         stroke-linecap="round" marker-end="url(#arrow)" />
-  <circle cx="480" cy="166" r="11" fill="#047857" />
-  <text x="480" y="171" text-anchor="middle" font-size="13" fill="#ffffff">2</text>
+  <circle cx="615" cy="150" r="11" fill="#047857" />
+  <text x="615" y="155" text-anchor="middle" font-size="13" fill="#ffffff">2</text>
 
-  <!-- 3: database -> api (response) -->
-  <path d="M400,238 L300,238 L300,110 L230,110" fill="none" stroke="#3f3f46"
-        stroke-width="2" stroke-linecap="round" marker-end="url(#arrow)" />
-  <circle cx="300" cy="174" r="11" fill="#c2410c" />
-  <text x="300" y="179" text-anchor="middle" font-size="13" fill="#ffffff">3</text>
+  <!-- time axis -->
+  <path d="M40,268 L720,268" fill="none" stroke="#a1a1aa" stroke-width="2"
+        stroke-linecap="round" marker-end="url(#arrow)" />
+  <text x="720" y="288" text-anchor="end" font-size="12" fill="#71717a">time →</text>
 </svg>
 ```

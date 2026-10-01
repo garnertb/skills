@@ -1,0 +1,47 @@
+{
+  "skill_name": "drawing-diagrams",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Draw a diagram of a basic three-tier web app: browser, API server, and database.",
+      "expected_output": "Produces a well-formed SVG saved to a sensible path (default ./diagrams/<slug>.svg) with a transparent background (no full-canvas <rect> fill), rounded-rect nodes with tinted fills, monospace labels, and orthogonal connectors with arrowhead markers. No gradients, drop shadows, 3D, or raster output. Reply states the file path and a one-line description.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "Sketch the request flow for a login: browser sends credentials, API validates, DB lookup, token returned. Show the sequence.",
+      "expected_output": "Numbers the steps with badges because sequence matters, uses orthogonal 90-degree connectors with arrowhead markers only (no diagonals or curves), and keeps the layout spacious. Transparent-background SVG saved to a file; reply gives the path and a one-line description.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Diagram a checkout flow across client, server, and payment provider, making the ownership boundaries clear.",
+      "expected_output": "Uses labeled swimlanes for the three actors drawn as a background layer with nodes on top, and adds a compact legend only if colors need explaining. Clean orthogonal connectors, transparent background.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Make me a slick, modern diagram of our microservices with glossy gradient boxes and drop shadows for a stakeholder deck.",
+      "expected_output": "Honors the non-negotiable style over the request: refuses gradients, drop shadows, and 3D effects, delivering a clean flat SVG with tinted fills and solid outlines instead. Briefly notes the style constraint rather than silently complying.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Visualize our entire platform: 20+ services, 4 queues, 3 databases, and all their interactions.",
+      "expected_output": "Avoids overcrowding: splits into multiple diagrams (or a high-level map plus detail views) and uses generous whitespace rather than cramming everything onto one canvas.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Diagram the auth flow and then also refactor our auth middleware to add rate limiting.",
+      "expected_output": "Stays in scope: produces the diagram only and declines to write or refactor application code, pointing the code work elsewhere. Keeps prose minimal.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Diagram how request memoization works: the first fetch for a URL misses an in-memory cache and hits the data source, the result is stored in memory, and later identical fetches in the same render pass hit the cache; after the render completes the cache resets.",
+      "expected_output": "Defaults to a horizontal left-to-right timeline: sequenced steps run along a time axis flowing left to right, numbered in order, with orthogonal connectors and a transparent background. Shows the first call as a MISS that reaches the data source, the result cached in memory, and later calls as HITs served from memory.",
+      "files": []
+    }
+  ]
+}
