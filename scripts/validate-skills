@@ -124,6 +124,8 @@ validate_layout() {
 failed=0
 validated=0
 
+validate_layout || failed=$[failed+1]
+
 if [ -n "${1:-}" ]; then
 	# Validate a specific skill, by name or category/name
 	skill_path=""
@@ -137,11 +139,9 @@ if [ -n "${1:-}" ]; then
 		echo "Error: Skill '$1' not found in ${SKILLS_DIR}/<category>/" >&2
 		exit 1
 	fi
-	validate_skill "$skill_path" || failed=1
+	validate_skill "$skill_path" || failed=$[failed+1]
 	validated=1
 else
-	validate_layout || failed=$[failed+1]
-
 	# Validate all skills
 	for skill_path in "${SKILLS_DIR}"/*/*/; do
 		# Skip if no directories found
