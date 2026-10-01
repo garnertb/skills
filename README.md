@@ -5,12 +5,12 @@ effectively.
 
 ## Skills
 
-| Category      | Skills                                                                                                                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dev-tooling` | [shell-script-generator](skills/dev-tooling/shell-script-generator), [vscode-tasks-organizer](skills/dev-tooling/vscode-tasks-organizer)                                                                            |
-| `engineering` | [pr-feedback-response](skills/engineering/pr-feedback-response), [principal-engineer-review](skills/engineering/principal-engineer-review), [web-interface-guidelines](skills/engineering/web-interface-guidelines) |
-| `github`      | [dependabot](skills/github/dependabot)                                                                                                                                                                              |
-| `logs`        | [wide-event-logging](skills/logs/wide-event-logging)                                                                                                                                                                |
+| Category  | Skills                                                                                                                                                                                                                                                               |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `develop` | [pr-feedback-response](skills/develop/pr-feedback-response), [principal-engineer-review](skills/develop/principal-engineer-review), [shell-script-generator](skills/develop/shell-script-generator), [vscode-tasks-organizer](skills/develop/vscode-tasks-organizer) |
+| `github`  | [dependabot](skills/github/dependabot)                                                                                                                                                                                                                               |
+| `logs`    | [wide-event-logging](skills/logs/wide-event-logging)                                                                                                                                                                                                                 |
+| `web`     | [web-interface-guidelines](skills/web/web-interface-guidelines)                                                                                                                                                                                                      |
 
 ## Installation
 

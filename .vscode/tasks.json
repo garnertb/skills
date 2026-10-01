@@ -55,7 +55,7 @@
 			"id": "skillCategory",
 			"type": "pickString",
 			"description": "Select the category for the new skill",
-			"options": ["dev-tooling", "engineering", "github", "logs"]
+			"options": ["develop", "github", "logs", "web"]
 		},
 		{
 			"id": "skillName",

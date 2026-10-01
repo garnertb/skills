@@ -18,12 +18,12 @@ skills/
 
 Skills are grouped into category folders by what they are used for:
 
-| Category      | Purpose                                         |
-| ------------- | ----------------------------------------------- |
-| `dev-tooling` | Developer tooling: shell scripts, editor config |
-| `engineering` | Engineering practices: reviews, PR feedback, UI |
-| `github`      | GitHub platform features (e.g. Dependabot)      |
-| `logs`        | Logging and observability                       |
+| Category  | Purpose                                                 |
+| --------- | ------------------------------------------------------- |
+| `develop` | Writing and reviewing code: scripts, editor config, PRs |
+| `github`  | GitHub platform features (e.g. Dependabot)              |
+| `logs`    | Logging and observability                               |
+| `web`     | Web UI design and accessibility                         |
 
 Place a new skill in the best-fitting existing category; add a new category only
 when no existing one fits. Skill names MUST be unique across categories.
@@ -44,7 +44,7 @@ metadata: # Optional
 
 The body contains actionable instructions for AI agents. Use MUST/SHOULD/NEVER
 language for clear guidance. See
-[skills/dev-tooling/shell-script-generator/SKILL.md](../skills/dev-tooling/shell-script-generator/SKILL.md)
+[skills/develop/shell-script-generator/SKILL.md](../skills/develop/shell-script-generator/SKILL.md)
 for a well-structured example.
 
 ## Command-Like Skills
@@ -146,4 +146,4 @@ All PRs run two checks via `.github/workflows/quality.yml`:
 - Use `references/REFERENCE.md` for detailed examples and extended documentation
 - Keep `SKILL.md` concise and actionable; put verbose content in references
 - Shell scripts in this repo follow the patterns in
-  [shell-script-generator](../skills/dev-tooling/shell-script-generator/SKILL.md)
+  [shell-script-generator](../skills/develop/shell-script-generator/SKILL.md)
